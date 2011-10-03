@@ -1,9 +1,9 @@
 /** 
- * Interview questions suck.  Here are a few algorithms, a toybox of
- * mental masturbation in JavaScript that you might find in an
- * interview.  There really is no better way to ingrain this shit other
- * than to do it over and over.  I make no guarantees to the correctness
- * or even usefullness of this code.
+ * Interview questions suck.  Here are a few algorithms, a toybox of bit
+ * and pieces in various languages that you might find in an interview.
+ * The best way to learn is to do it yourself, ingraining till it is
+ * reflexive.  The other way is search-copy-paste.  I make no
+ * guarantees to the correctness or even usefullness of this code.
  * 
  * Copyright (c) 2011, Micah Jaffe 
  * Licensed for use under BSD License.
