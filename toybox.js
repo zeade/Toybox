@@ -1,6 +1,11 @@
-// Copyright (c) 2011, Micah Jaffe 
-// Licensed for use under BSD License.
-// http://www.opensource.org/licenses/bsd-license.php
+/**
+ * @author Micah Jaffe
+ * Personal toy problems and code snippets I've used in the past.
+ * 
+ * Copyright (c) 2011 - 2012, Micah Jaffe
+ * Licensed for use under BSD License.
+ * http://www.opensource.org/licenses/bsd-license.php
+ */
 
 // Crockford-ian object creation
 // http://javascript.crockford.com/prototypal.html
@@ -12,6 +17,41 @@ if (typeof Object.create !== 'function') {
   };
 }
 
+// Checks type for integer
+var isInt = function (i) {
+  return typeof i === 'number' && parseInt(i) == parseFloat(i) && !isNaN(i);	
+};
+
+// Checks type, value where i > 0 returns true
+var isPositiveInt = function (i) {
+  return isInt(i) && i > -1;
+};
+
+var isArray = function(a) {
+  return a instanceof Array;  
+};
+
+/**
+ * Distance between two points (a, b) in 2D (or higher)
+ *
+ * @see http://en.wikipedia.org/wiki/Distance
+ * @param {Array} a Point a, coordinates ordered as x, y, z, etc
+ * @param {Array} b Point b, sames as point a
+ * @return {number} Distance from a to b (positive) or Math.NaN if there was an error
+ */
+var distance = function (a, b) {
+  var d = Math.NaN, delta = 0;
+  if (isArray(a) && isArray(b) && a.length > 1 && a.length === b.length) {
+    // Doing this for clarity, not compactness
+    delta = Math.pow(b[0] - a[0], 2) + Math.pow(b[1] - a[1], 2);
+    for (var i = 2; i < a.length; i++) {
+      delta += Math.pow(b[i] - a[i], 2);
+    }
+    d = Math.sqrt(delta);
+  }
+  return d;
+};
+
 // http://en.wikipedia.org/wiki/Fibonacci_number
 // 0 + 1 + 1 + 2 + 3 + 5 + 8 ...  
 var fibonacci = function (n, useRecursion) {
@@ -20,7 +60,7 @@ var fibonacci = function (n, useRecursion) {
     b = 1, 
     sum = 0;
 
-  if (typeof n !== 'number' || n < 0) {
+  if (isPositiveInt(n)) {
     return Number.NaN;
   }
 
@@ -47,8 +87,7 @@ var fibonacci = function (n, useRecursion) {
 var factorial = function (n, useRecursion) {
   var prod = 1;
 
-  // FIXME: check for integer
-  if (typeof n !== 'number' || n < 0) {
+  if (!isPositiveInt(n)) {
     return Number.NaN;
   }
 
@@ -68,18 +107,71 @@ var factorial = function (n, useRecursion) {
   }
 };
 
-// http://en.wikipedia.org/wiki/Quicksort
-// This does not sort in place, returns new array
-var quicksort = function (array, comparator) {
+/**
+ * Binomial coefficient, "n choose k" or "pick k unordered outcomes from n possibilities" 
+ * = n! / (n-k)! * k! where 0 <= k < n, 0 otherwise
+ *
+ * @function
+ * @see http://en.wikipedia.org/wiki/Binomial_coefficient
+ * @see http://mathworld.wolfram.com/BinomialCoefficient.html
+ * @param {number} n Number of events to pick from
+ * @param {number} k Number of events to pick
+ * @return {number} Number of possible outcomes
+ */
+var binomialCoefficient = function (n, k) {
+	if (!isPositiveInt(k) || !isInt(n) || !(k < n)) {
+  	return 0;
+	}
+  return (factorial(n) / (factorial(n - k) * factorial(k)));
+};
+
+/**
+ * Dice roller
+ *
+ * @function 
+ * @param {number} n Number of dice to roll (default 1)
+ * @param {number} max Max integers a dice can represent, from 1 to max (default 6)
+ * @param {function} perRollCallback Function to call per callback with 2 parameters: value, sequence # (starting at 0)
+ * @return {number} sum of rolls
+ */
+var rollDice = function(n, max, perRollCallback) {
+  var sum = 0,
+    aRoll,
+    hasCallback = typeof perRollCallback === 'function';
+  
+  if (!isPositiveInt(n)) {
+    n = 1;
+  }
+  if (!isPositiveInt(max)) {
+    max = 6;
+  }
+
+  for (var i = 0; i < n; i++) {
+    aRoll = Math.floor(Math.random() * max + 1);
+    sum += aRoll;
+    if (hasCallback) {
+      perRollCallback(aRoll, i);
+    }
+  }
+  return sum;
+};
+
+/**
+ * Quicksort (non-destructive)
+ *
+ * @see http://en.wikipedia.org/wiki/Quicksort
+ * @param {Array} array to be sorted
+ * @param {function} comparator function to use between two elements in the list (e.g. a, b), default evaluates to (returns) -1 if a < b, 0 if equal, 1 if b > a
+ * @return {Array} sorted array
+ */
+var quicksort = function (arr, comparator) {
   var lesser = [], 
     greater = [], 
     pivot;
 
-  // Empty or array of 1 is already sorted
-  if (typeof array !== 'object' 
-      || !array.hasOwnProperty('length') 
-      || array.length <= 1) {
-    return array;
+  // Not an array, empty or array of 1 is already sorted
+  if (!isArray(arr) || arr.length < 2) {
+    return arr;
   }
 
   // Create a comparator func if not passed in
@@ -96,15 +188,15 @@ var quicksort = function (array, comparator) {
   }
 
   // Get our pivot, this could be randomized
-  pivot = array.pop();
+  pivot = arr.pop();
 
   // Iterate and put vals into either lesser or greater lists compared
   // to the pivot
-  for (var i = 0; i < array.length; i++) {
-    if (comparator(array[i], pivot) < 1) {
-      lesser.push(array[i]);
+  for (var i = 0; i < arr.length; i++) {
+    if (comparator(arr[i], pivot) < 1) {
+      lesser.push(arr[i]);
     } else {
-      greater.push(array[i]);
+      greater.push(arr[i]);
     }
   }
 
@@ -118,26 +210,26 @@ var quicksort = function (array, comparator) {
 
 // http://en.wikipedia.org/wiki/Fisher-Yates_shuffle
 // Randomizes (shuffles) an array in place, like a deck of cards.
-var shuffle = function (array) {
+// FIXME: make non-destructive?
+var shuffle = function (arr) {
   var i, k, prev;
 
-  if (typeof array !== 'object' || !array.hasOwnProperty('length')) {
-    return array;
+  if (typeof arr !== 'object' || !arr.hasOwnProperty('length')) {
+    return arr;
   }
 
   // Walk backwards through array
-  for (i = array.length - 1; i >= 0; i--) {
+  for (i = arr.length - 1; i >= 0; i--) {
 
     // Pick an index in the array that is <= to the current location
     k = Math.floor(Math.random() * i);
 
     // Swap values with current index and random pick
-    prev = array[i];
-    array[i] = array[k];
-    array[k] = prev;
+    prev = arr[i];
+    arr[i] = arr[k];
+    arr[k] = prev;
   }
-
-  return array;
+  return arr;
 };
 
 // http://en.wikipedia.org/wiki/Tree_sort
@@ -187,10 +279,18 @@ var TreeSort = {
 // For use in other frameworks e.g. RequireJS or NodeJS
 // http://requirejs.org/
 // http://nodejs.org/
+exports.isInt = isInt;
+exports.isPositiveInt = isPositiveInt;
+exports.isArray = isArray;
+exports.distance = distance;
 exports.fibonacci = fibonacci;
 exports.fib = fibonacci;
 exports.factorial = factorial;
 exports.fact = factorial;
+exports.binomialCoefficient = binomialCoefficient;
+exports.binomial = binomialCoefficient;
+exports.rollDice = rollDice;
+exports.roll = rollDice;
 exports.quicksort = quicksort;
 exports.qsort = quicksort;
 exports.shuffle = shuffle;
