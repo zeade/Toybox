@@ -37,10 +37,10 @@ var isArray = function(a) {
  * @see http://en.wikipedia.org/wiki/Distance
  * @param {Array} a Point a, coordinates ordered as x, y, z, etc
  * @param {Array} b Point b, sames as point a
- * @return {number} Distance from a to b (positive) or Math.NaN if there was an error
+ * @return {number} Distance from a to b (positive) or Number.NaN if there was an error
  */
 var distance = function (a, b) {
-  var d = Math.NaN, delta = 0;
+  var d = Number.NaN, delta = 0;
   if (isArray(a) && isArray(b) && a.length > 1 && a.length === b.length) {
     // Doing this for clarity, not compactness
     delta = Math.pow(b[0] - a[0], 2) + Math.pow(b[1] - a[1], 2);
@@ -60,7 +60,7 @@ var fibonacci = function (n, useRecursion) {
     b = 1, 
     sum = 0;
 
-  if (isPositiveInt(n)) {
+  if (!isPositiveInt(n)) {
     return Number.NaN;
   }
 
@@ -119,9 +119,9 @@ var factorial = function (n, useRecursion) {
  * @return {number} Number of possible outcomes
  */
 var binomialCoefficient = function (n, k) {
-	if (!isPositiveInt(k) || !isInt(n) || !(k < n)) {
-  	return 0;
-	}
+  if (!isPositiveInt(k) || !isInt(n) || !(k < n)) {
+    return 0;
+  }
   return (factorial(n) / (factorial(n - k) * factorial(k)));
 };
 
@@ -160,8 +160,8 @@ var rollDice = function(n, max, perRollCallback) {
  * Quicksort (non-destructive)
  *
  * @see http://en.wikipedia.org/wiki/Quicksort
- * @param {Array} array to be sorted
- * @param {function} comparator function to use between two elements in the list (e.g. a, b), default evaluates to (returns) -1 if a < b, 0 if equal, 1 if b > a
+ * @param {Array} arr Array to be sorted
+ * @param {function} comparator Function to use between two elements in the list (e.g. a, b), default evaluates to (returns) -1 if a < b, 0 if equal, 1 if b > a
  * @return {Array} sorted array
  */
 var quicksort = function (arr, comparator) {
@@ -214,7 +214,7 @@ var quicksort = function (arr, comparator) {
 var shuffle = function (arr) {
   var i, k, prev;
 
-  if (typeof arr !== 'object' || !arr.hasOwnProperty('length')) {
+  if (!isArray(arr)) {
     return arr;
   }
 
