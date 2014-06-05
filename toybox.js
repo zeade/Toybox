@@ -2,7 +2,7 @@
  * @author Micah Jaffe
  * Personal toy problems and code snippets I've used in the past.
  * 
- * Copyright (c) 2011 - 2012, Micah Jaffe
+ * Copyright (c) 2011 - 2014, Micah Jaffe
  * Licensed for use under BSD License.
  * http://www.opensource.org/licenses/bsd-license.php
  */
@@ -232,6 +232,37 @@ var shuffle = function (arr) {
   return arr;
 };
 
+// Find a substring in a string, same as String.indexOf
+var indexOf = function(str, subStr) {
+  var noMatch = -1, matchedAt = noMatch, strIdx = 0, subStrIdx = 0;
+
+  if (typeof str != 'string' || typeof subStr != 'string' || subStr.length > str.length || str.length == 0) {
+    return noMatch;
+  }
+
+  // Advance through str, comparing a letter at a time. Record first match and advance subStrIdx, reset if no match.
+  while (true) {
+    if (str[strIdx] == subStr[subStrIdx]) {
+      if (matchedAt == noMatch) {
+        matchedAt = strIdx;
+      }
+      if (++subStrIdx == subStr.length) {
+        break;
+      }
+    } else {
+      matchedAt = noMatch;
+      subStrIdx = 0;
+    }
+    // If we have advanced to the end of the string and not broken out, we have no match.
+    if (++strIdx == str.length) {
+      matchedAt = noMatch;
+      break;
+    }
+  }
+
+  return matchedAt;
+};
+
 // http://en.wikipedia.org/wiki/Tree_sort
 // Worst: O(n^2) (unbalanced), O(n log n) (balanced)
 // Best: O(n)
@@ -244,32 +275,48 @@ var TreeSort = {
   create: function () { 
     return Object.create(TreeSort);
   },
-  insert: function (aValue) {
-    if (this.value === null || this.value === aValue) {
-      this.value = aValue;
-      this.count++;
-    }
-    else if (aValue < this.value) {
-      if (this.left === null) {
-        this.left = TreeSort.create();
+  new: function (value) {
+    obj = this.create();
+    if (value !== null) obj.insert(value);
+    return obj;
+  },
+  insert: function (value) {
+    if (Array.isArray(value)) {
+      for (var i = 0; i < value.length; i++) {
+        this.insert(value[i]);
       }
-      this.left.add(aValue);
-    }
-    else if (aValue > this.value) {
-      if (this.right === null) {
-        this.right = TreeSort.create();
+    } else {
+      if (this.value === null || this.value === value) {
+        this.value = value;
+        this.count++;
       }
-      this.right.add(aValue);
+      else if (value < this.value) {
+        if (this.left === null) this.left = this.create();
+        this.left.insert(value);
+      }
+      else if (value > this.value) {
+        if (this.right === null) this.right = this.create();
+        this.right.insert(value);
+      }
     }
   },
   toArray: function () {
     if (this.value === null) {
       return [];
+    }    
+    var valueOf = Object.prototype.valueOf
+    switch (typeof this.value) {
+      case 'number':
+        valueOf = Number.prototype.valueOf;
+        break;
+      case 'string':
+        valueOf = String.prototype.valueOf;
+        break;
     }
     return [].concat(
-      this.left ? this.left.toArray() : [], 
-      this.value, 
-      this.right ? this.right.toArray() : []
+      this.left !== null ? this.left.toArray() : [],
+      Array.apply(null, new Array(this.count)).map(valueOf, this.value),
+      this.right !== null ? this.right.toArray() : []
     );
   }
 };
@@ -294,4 +341,5 @@ exports.roll = rollDice;
 exports.quicksort = quicksort;
 exports.qsort = quicksort;
 exports.shuffle = shuffle;
+exports.indexOf = indexOf;
 exports.TreeSort = TreeSort;
